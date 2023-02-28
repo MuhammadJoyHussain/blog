@@ -1,14 +1,21 @@
+import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-import blogs from "../../json/blogs";
 
 const BlogDetails = () => {
   const router = useRouter();
   const id = router.query.id;
+  const [blogs, setBlogs] = useState([]);
 
-  const blog = blogs?.find((b) => b.id === id);
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/api/blog`)
+      .then((res) => setBlogs(res.data?.data));
+  }, []);
+
+  const blog = blogs?.find((b) => b._id === id);
 
   return (
     <div className="mx-10 mt-20">

@@ -7,9 +7,11 @@ import {
   Button,
   IconButton,
 } from "@material-tailwind/react";
+import axios from "axios";
 
 const Header = () => {
   const [openNav, setOpenNav] = useState(false);
+  const [user, setUser] = useState([]);
 
   useEffect(() => {
     window.addEventListener(
@@ -61,12 +63,18 @@ const Header = () => {
           </span>
         </div>
         <div className="hidden lg:block">{navList}</div>
-        <Button variant="gradient" size="sm" className="hidden lg:inline-block">
-          <span className="flex">
-            Google Signin
-            <img src="/google.png" className="w-4 h-4 ml-2" />
-          </span>
-        </Button>
+        <a href={"http://localhost:5000/auth/google"}>
+          <Button
+            variant="gradient"
+            size="sm"
+            className="hidden lg:inline-block"
+          >
+            <span className="flex">
+              Google Signin
+              <img src="/google.png" className="w-4 h-4 ml-2" />
+            </span>
+          </Button>
+        </a>
         <IconButton
           variant="text"
           className="ml-auto h-6 w-6 text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent lg:hidden"
