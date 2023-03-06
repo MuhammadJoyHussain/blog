@@ -11,7 +11,7 @@ import axios from "axios";
 
 const Header = () => {
   const [openNav, setOpenNav] = useState(false);
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     window.addEventListener(
@@ -19,6 +19,17 @@ const Header = () => {
       () => window.innerWidth >= 960 && setOpenNav(false)
     );
   }, []);
+
+  const handleGoogleLogin = () => {
+    axios
+      .get("/auth/google")
+      .then((response) => {
+        window.location.href = response.data.redirectUrl;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const navList = (
     <ul className="mb-4 mt-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">

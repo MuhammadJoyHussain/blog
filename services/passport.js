@@ -19,11 +19,13 @@ passport.use(
   new GoogleStrategy(
     {
       callbackURL: "/auth/google/callback",
-      clientID: keys.googleClientID,
-      clientSecret: keys.googleClientSecret,
+      clientID:
+        "587388582907-tidhnniqi1qbffeml8495lplkn1nmn5l.apps.googleusercontent.com",
+      clientSecret: "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",
       proxy: true,
     },
     async (accessToken, refreshToken, profile, done) => {
+      console.log(profile);
       try {
         const existingUser = await User.findOne({ googleId: profile.id });
         if (existingUser) {
@@ -33,6 +35,7 @@ passport.use(
           googleId: profile.id,
           displayName: profile.displayName,
         }).save();
+
         done(null, user);
       } catch (err) {
         done(err, null);

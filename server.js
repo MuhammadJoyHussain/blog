@@ -14,14 +14,14 @@ const connectDB = require("./config/db");
 
 dotenv.config({ path: "./config/config.env" });
 
-mongoose.set("strictQuery", false);
-connectDB();
-
 const blog = require("./routes/blog");
 require("./Models/User");
 require("./services/passport");
 
 const app = express();
+
+mongoose.set("strictQuery", false);
+connectDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -39,11 +39,11 @@ app.use(
   })
 );
 
+app.use("/api/blog", blog);
+require("./routes/user")(app);
+
 app.use(passport.initialize());
 app.use(passport.session());
-
-app.use("/api/blog", blog);
-require("./controllers/user")(app);
 
 const PORT = process.env.PORT || 5000;
 

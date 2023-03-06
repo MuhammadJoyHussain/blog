@@ -1,7 +1,17 @@
 import Head from "next/head";
 import Header from "@/components/Header";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Home() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/current_user")
+      .then((res) => setUser(res.data));
+  }, []);
+
   return (
     <>
       <Head>
@@ -14,7 +24,16 @@ export default function Home() {
         <Header />
         <div className="flex justify-center items-center h-[80vh]">
           <h1 className="text-bold text-xl text-green-500">
-            This is a private blogging web app
+            <div>
+              {user ? (
+                <div>
+                  <p>Welcome, {user.displayName}!</p>
+                  <p>Your email is: {user.emails[0].value}</p>
+                </div>
+              ) : (
+                <p>Please log in to view your profile.</p>
+              )}
+            </div>
           </h1>
         </div>
       </main>
