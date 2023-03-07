@@ -31,6 +31,12 @@ const Header = () => {
       });
   };
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/current_user")
+      .then((res) => setUser(res?.data));
+  }, []);
+
   const navList = (
     <ul className="mb-4 mt-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
       <Typography

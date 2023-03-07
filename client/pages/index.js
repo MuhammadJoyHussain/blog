@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Home() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/current_user")
-      .then((res) => setUser(res.data));
+      .then((res) => setUser(res?.data));
   }, []);
 
   return (
@@ -28,7 +28,6 @@ export default function Home() {
               {user ? (
                 <div>
                   <p>Welcome, {user.displayName}!</p>
-                  <p>Your email is: {user.emails[0].value}</p>
                 </div>
               ) : (
                 <p>Please log in to view your profile.</p>
