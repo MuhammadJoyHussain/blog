@@ -2,21 +2,19 @@ const express = require("express");
 const dotenv = require("dotenv");
 const colors = require("colors");
 const cors = require("cors");
-const passport = require("passport");
-const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 
-const keys = require("./config/keys");
+cookieParser = require("cookie-parser");
 
 const mongoose = require("mongoose");
+const errorHandler = require("./middlewares/error");
 
 const connectDB = require("./config/db");
 
 dotenv.config({ path: "./config/config.env" });
 
 const blog = require("./routes/blog");
-require("./Models/User");
-require("./services/passport");
+const auth = require("./routes/auth");
 
 const app = express();
 
@@ -24,7 +22,7 @@ mongoose.set("strictQuery", false);
 connectDB();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use(cors());
 
@@ -32,18 +30,10 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(
-  cookieSession({
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    keys: [keys.cookieKey],
-  })
-);
-
 app.use("/api/blog", blog);
-require("./routes/user")(app);
+app.use("/api/auth", auth);
 
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 

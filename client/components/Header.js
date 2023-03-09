@@ -8,33 +8,16 @@ import {
   IconButton,
 } from "@material-tailwind/react";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const Header = () => {
   const [openNav, setOpenNav] = useState(false);
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     window.addEventListener(
       "resize",
       () => window.innerWidth >= 960 && setOpenNav(false)
     );
-  }, []);
-
-  const handleGoogleLogin = () => {
-    axios
-      .get("/auth/google")
-      .then((response) => {
-        window.location.href = response.data.redirectUrl;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/current_user")
-      .then((res) => setUser(res?.data));
   }, []);
 
   const navList = (
@@ -80,18 +63,26 @@ const Header = () => {
           </span>
         </div>
         <div className="hidden lg:block">{navList}</div>
-        <a href={"http://localhost:5000/auth/google"}>
+        {Cookies.get("token") ? (
           <Button
             variant="gradient"
             size="sm"
             className="hidden lg:inline-block"
+            onClick={Cookies.remove("token")}
           >
-            <span className="flex">
-              Google Signin
-              <img src="/google.png" className="w-4 h-4 ml-2" />
-            </span>
+            Logout
           </Button>
-        </a>
+        ) : (
+          <Link href="/login">
+            <Button
+              variant="gradient"
+              size="sm"
+              className="hidden lg:inline-block"
+            >
+              Login
+            </Button>
+          </Link>
+        )}
         <IconButton
           variant="text"
           className="ml-auto h-6 w-6 text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent lg:hidden"
@@ -134,10 +125,7 @@ const Header = () => {
         <div className="container mx-auto">
           {navList}
           <Button variant="gradient" size="sm" className="mb-2 ">
-            <span className="flex text-center">
-              Google Signin
-              <img src="/google.png" className="w-4 h-4 ml-2" />
-            </span>
+            Login
           </Button>
         </div>
       </MobileNav>
