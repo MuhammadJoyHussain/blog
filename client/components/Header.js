@@ -68,7 +68,6 @@ const Header = () => {
             variant="gradient"
             size="sm"
             className="hidden lg:inline-block"
-            onClick={Cookies.remove("token")}
           >
             Logout
           </Button>

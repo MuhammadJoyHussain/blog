@@ -17,7 +17,10 @@ const MyBlog = () => {
       <Header />
       <div className="max-w-sm w-full lg:max-w-full mt-5 justify-center">
         {blogs?.map((b) => (
-          <div className="border-r border-b border-l mx-28 my-5 border-gray-400 lg:border-l lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r flex flex-col justify-between leading-normal">
+          <div
+            key={b._id}
+            className="border-r border-b border-l mx-28 my-5 border-gray-400 lg:border-l lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r flex flex-col justify-between leading-normal"
+          >
             <div className="mb-8 p-4">
               <div className="text-gray-900 font-bold text-xl mb-2 border-b">
                 {b.title}
