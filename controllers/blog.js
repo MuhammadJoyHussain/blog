@@ -1,4 +1,5 @@
 const Blog = require("../Models/Blog");
+const User = require("../Models/User");
 
 exports.createBlog = async (req, res, next) => {
   const blog = await Blog.create(req.body);
@@ -10,6 +11,10 @@ exports.createBlog = async (req, res, next) => {
 };
 
 exports.getBlogs = async (req, res, next) => {
+  const user = User.findById(req.user._id);
+
+  console.log(user);
+
   const blog = await Blog.find();
 
   res.status(200).json({

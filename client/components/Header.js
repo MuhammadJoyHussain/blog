@@ -7,11 +7,13 @@ import {
   Button,
   IconButton,
 } from "@material-tailwind/react";
-import axios from "axios";
 import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 const Header = () => {
+  const router = useRouter();
   const [openNav, setOpenNav] = useState(false);
+  const [session, setSession] = useState();
 
   useEffect(() => {
     window.addEventListener(
@@ -19,6 +21,15 @@ const Header = () => {
       () => window.innerWidth >= 960 && setOpenNav(false)
     );
   }, []);
+
+  useEffect(() => {
+    setSession(Cookies.get("token"));
+  }, []);
+
+  const logout = () => {
+    Cookies.remove("token");
+    router.push("/");
+  };
 
   const navList = (
     <ul className="mb-4 mt-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
@@ -63,25 +74,28 @@ const Header = () => {
           </span>
         </div>
         <div className="hidden lg:block">{navList}</div>
-        {Cookies.get("token") ? (
-          <Button
-            variant="gradient"
-            size="sm"
-            className="hidden lg:inline-block"
-          >
-            Logout
-          </Button>
-        ) : (
-          <Link href="/login">
+        <div>
+          {session ? (
             <Button
               variant="gradient"
               size="sm"
               className="hidden lg:inline-block"
+              onClick={logout}
             >
-              Login
+              Logout
             </Button>
-          </Link>
-        )}
+          ) : (
+            <Link href="/login">
+              <Button
+                variant="gradient"
+                size="sm"
+                className="hidden lg:inline-block"
+              >
+                Login
+              </Button>
+            </Link>
+          )}
+        </div>
         <IconButton
           variant="text"
           className="ml-auto h-6 w-6 text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent lg:hidden"

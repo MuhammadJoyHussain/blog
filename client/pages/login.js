@@ -18,7 +18,10 @@ const login = () => {
       .post("http://localhost:5000/api/auth/login", data)
       .then((res) => {
         if (res.data?.token) {
-          router.push("/");
+          if (router?.asPath == "/login") {
+            router.push(`/myblog`);
+          }
+          router.push(`${router?.asPath}`);
           Cookies.set("token", res.data?.token);
         }
       })
