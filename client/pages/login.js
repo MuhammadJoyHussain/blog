@@ -14,6 +14,7 @@ const login = () => {
   const handleSignin = async (e) => {
     e.preventDefault();
     const data = { email, password };
+
     await axios
       .post("http://localhost:5000/api/auth/login", data)
       .then((res) => {

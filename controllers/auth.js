@@ -1,11 +1,41 @@
-const ErrorResponse = require("../utils/errorResponse");
-const crypto = require("crypto");
 const asyncHandler = require("../middlewares/async");
-const sendEmail = require("../utils/senEmail");
+const generateToken = require("../utils/generateToken");
 const User = require("../Models/User");
 
-exports.register = asyncHandler(async (req, res, next) => {
-  const { name, email, password, phone, package, skype, role } = req.body;
+// @desc    Auth user & get token
+// @route   POST /api/users/login
+// @access  Public
+exports.authUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (user && (await user.matchPassword(password))) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+});
+
+// @desc    Register a new user
+// @route   POST /api/users
+// @access  Public
+exports.registerUser = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
+
+  const userExists = await User.findOne({ email });
+
+  if (userExists) {
+    res.status(400);
+    throw new Error("User already exists");
+  }
 
   const user = await User.create({
     name,
@@ -13,137 +43,125 @@ exports.register = asyncHandler(async (req, res, next) => {
     password,
   });
 
-  sendTokenResponse(user, 200, res);
+  if (user) {
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalid user data");
+  }
 });
 
-exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return next(new ErrorResponse("Please provide an email and password", 400));
-  }
-
-  const user = await User.findOne({ email }).select("+password");
-
-  if (!user) {
-    return next(new ErrorResponse("Invalid Email or Password", 401));
-  }
-
-  const isMatch = await user.matchPassword(password);
-
-  if (!isMatch) {
-    return next(new ErrorResponse("Invalid Password", 401));
-  }
-
-  sendTokenResponse(user, 200, res);
-});
-
-exports.getMe = asyncHandler(async (req, res, next) => {
+// @desc    Get user profile
+// @route   GET /api/users/profile
+// @access  Private
+exports.getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
-  console.log(user);
-
-  res.status(200).json({
-    success: true,
-    data: user,
-  });
-});
-
-exports.getUser = asyncHandler(async (req, res, next) => {
-  const user = await User.find();
-
-  console.log(user);
-
-  res.status(200).json({
-    success: true,
-    data: user,
-  });
-});
-
-exports.forgotPassword = asyncHandler(async (req, res, next) => {
-  const user = await User.findOne({ email: req.body.email });
-
-  if (!user) {
-    return next(new ErrorResponse("There is no user with that email", 404));
-  }
-
-  // Get reset token
-  const resetToken = user.getResetPasswordToken();
-
-  await user.save({ validateBeforeSave: false });
-
-  // Create reset url
-  const resetUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/api/auth/resetpassword/${resetToken}`;
-
-  const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to : \n\n ${resetUrl}`;
-
-  try {
-    await sendEmail({
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
       email: user.email,
-      subject: "Password reset token",
-      message,
+      isAdmin: user.isAdmin,
     });
-    res.status(200).json({ success: true, data: "Email sent" });
-  } catch (err) {
-    console.log(err);
-    user.getResetPasswordToken = undefined;
-    user.getResetPasswordExpire = undefined;
-
-    await user.save({ validateBeforeSave: false });
-
-    return next(new ErrorResponse("Email could not be sent", 500));
+  } else {
+    res.status(404);
+    throw new Error("User not found");
   }
-
-  res.status(200).json({
-    success: true,
-    data: user,
-  });
 });
 
-exports.resetPassword = asyncHandler(async (req, res, next) => {
-  // Get hashed token
-  resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(req.params.resettoken)
-    .digest("hex");
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+exports.updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
 
-  const user = await User.findOne({
-    resetPasswordToken,
-    getResetPasswordExpire: { $gt: Date.now() },
-  });
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
 
-  if (!user) {
-    return next(new ErrorResponse("Invalid token", 400));
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isAdmin: updatedUser.isAdmin,
+      token: generateToken(updatedUser._id),
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
   }
-
-  // Set new password
-  user.password = req.body.password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
-  await user.save();
-
-  sendTokenResponse(user, 200, res);
 });
 
-const sendTokenResponse = (user, statusCode, res) => {
-  // Create token
-  const token = user.getSignedJwtToken();
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private/Admin
+exports.getUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({});
+  res.json(users);
+});
 
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+exports.deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
 
-  if (process.env.NODE_ENV === "production") {
-    options.secure = true;
+  if (user) {
+    await user.remove();
+    res.json({ message: "User removed" });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
   }
+});
 
-  res.status(statusCode).cookie("token", token, options).json({
-    success: true,
-    token,
-  });
-};
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private/Admin
+exports.getUserById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).select("-password");
+
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
+
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private/Admin
+exports.updateUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.isAdmin = req.body.isAdmin;
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isAdmin: updatedUser.isAdmin,
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});

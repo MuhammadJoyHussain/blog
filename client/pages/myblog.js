@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import axios from "axios";
+import Cookies from "js-cookie";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
@@ -7,8 +8,15 @@ const MyBlog = () => {
   const [blogs, setBlogs] = useState([]);
 
   useEffect(() => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    };
+
     axios
-      .get(`http://localhost:5000/api/blog`)
+      .get(`http://localhost:5000/api/blog`, config)
       .then((res) => setBlogs(res.data?.data));
   }, []);
 

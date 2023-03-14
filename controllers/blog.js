@@ -11,11 +11,13 @@ exports.createBlog = async (req, res, next) => {
 };
 
 exports.getBlogs = async (req, res, next) => {
-  const blog = await Blog.find();
+  const user = await User.find(req.user._id);
+  console.log(user);
+  const blogs = await Blog.find(user).cache({ key: req.user._id });
 
   res.status(200).json({
     status: true,
-    data: blog,
+    data: blogs,
   });
 };
 

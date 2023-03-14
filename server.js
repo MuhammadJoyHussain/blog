@@ -1,12 +1,12 @@
+const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const colors = require("colors");
 const cors = require("cors");
 const morgan = require("morgan");
 
-cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 
-const mongoose = require("mongoose");
 const errorHandler = require("./middlewares/error");
 
 const connectDB = require("./config/db");
@@ -16,22 +16,26 @@ dotenv.config({ path: "./config/config.env" });
 const blog = require("./routes/blog");
 const auth = require("./routes/auth");
 
-const app = express();
-
-mongoose.set("strictQuery", false);
 connectDB();
 
-app.use(express.json());
-app.use(cookieParser());
-
-app.use(cors());
+const app = express();
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors());
+
 app.use("/api/blog", blog);
 app.use("/api/auth", auth);
+
+if (!process.env.NODE_ENV === "production") {
+  app.get("/", (req, res) => {
+    res.send("API is running....");
+  });
+}
 
 app.use(errorHandler);
 
