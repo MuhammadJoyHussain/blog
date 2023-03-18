@@ -2,23 +2,28 @@ const Blog = require("../Models/Blog");
 const User = require("../Models/User");
 
 exports.createBlog = async (req, res, next) => {
-  const blog = await Blog.create(req.body);
+  const { title, blog } = req.body;
 
-  res.status(200).json({
-    success: true,
-    data: blog,
+  const createBlog = new Blog({
+    title,
+    blog,
+    _user: req.user.id,
   });
+
+  try {
+    await createBlog.save();
+    res.send(createBlog);
+  } catch (err) {
+    res.send(400, err);
+  }
 };
 
 exports.getBlogs = async (req, res, next) => {
-  const user = await User.find(req.user._id);
-  console.log(user);
-  const blogs = await Blog.find(user).cache({ key: req.user._id });
-
-  res.status(200).json({
-    status: true,
-    data: blogs,
+  const blogs = await Blog.find({ _user: req.user.id }).cache({
+    key: req.user.id,
   });
+
+  res.send({ data: blogs });
 };
 
 exports.getBlog = async (req, res, next) => {

@@ -1,14 +1,11 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const BlogSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, "Please give a title"],
-  },
-  blog: {
-    type: String,
-    required: [true, "Please write some blog"],
-  },
+const BlogSchema = new Schema({
+  title: String,
+  blog: String,
+  createdAt: { type: Date, default: Date.now },
+  _user: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
 module.exports = mongoose.model("Blog", BlogSchema);

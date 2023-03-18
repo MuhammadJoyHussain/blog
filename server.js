@@ -1,4 +1,3 @@
-const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const colors = require("colors");
@@ -15,6 +14,7 @@ dotenv.config({ path: "./config/config.env" });
 
 const blog = require("./routes/blog");
 const auth = require("./routes/auth");
+require("./services/cache");
 
 connectDB();
 

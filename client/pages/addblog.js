@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import { Button, Input, Textarea } from "@material-tailwind/react";
 import axios from "axios";
+import Cookies from "js-cookie";
 import React, { useState } from "react";
 
 const AddBlog = () => {
@@ -9,10 +10,16 @@ const AddBlog = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    };
 
     const data = { title, blog };
 
-    axios.post("http://localhost:5000/api/blog", data);
+    axios.post("http://localhost:5000/api/blog", data, config);
   };
 
   return (
