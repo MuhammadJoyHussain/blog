@@ -10,7 +10,7 @@ const {
   getUserById,
   updateUser,
 } = require("../controllers/auth");
-const { protect, authorize } = require("../middlewares/auth");
+const { protect } = require("../middlewares/auth");
 
 router.route("/").post(registerUser).get(protect, getUsers);
 router.post("/login", authUser);
