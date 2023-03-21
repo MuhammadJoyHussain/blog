@@ -85,15 +85,17 @@ const Header = () => {
               Logout
             </Button>
           ) : (
-            <Link href="/login">
-              <Button
-                variant="gradient"
-                size="sm"
-                className="hidden lg:inline-block"
-              >
-                Login
-              </Button>
-            </Link>
+            <div className="auth">
+              <Link href="/login">
+                <Button
+                  variant="gradient"
+                  size="sm"
+                  className="hidden lg:inline-block"
+                >
+                  Login
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
         <IconButton
@@ -137,9 +139,13 @@ const Header = () => {
       <MobileNav open={openNav}>
         <div className="container mx-auto">
           {navList}
-          <Button variant="gradient" size="sm" className="mb-2 ">
-            Login
-          </Button>
+          <div className="auth">
+            <Link href="/login">
+              <Button variant="gradient" size="sm" className="mb-2">
+                Login
+              </Button>
+            </Link>
+          </div>
         </div>
       </MobileNav>
     </Navbar>

@@ -1,13 +1,27 @@
 const puppeteer = require("puppeteer");
 
-test("Adds two numbers", () => {
-  const sum = 1 + 2;
+let browser, page;
 
-  expect(sum).toEqual(3);
+beforeEach(async () => {
+  browser = await puppeteer.launch({ headless: false });
+  page = await browser.newPage();
+  await page.goto("http://localhost:3000");
 });
 
-test("We can launch a browser", async () => {
-  const browser = await puppeteer.launch({ headless: false });
-  const page = await browser.newPage();
-  await page.goto("http://localhost:3000");
+afterEach(async () => {
+  await browser.close();
+});
+
+test("The header has the correct text", async () => {
+  const text = await page.$eval("span.font-semibold", (el) => el.innerHTML);
+
+  expect(text).toEqual("Let's Blog");
+});
+
+test("Clicking login to go to login page", async () => {
+  await page.click(".auth a");
+
+  const url = page.url();
+
+  expect(url).toMatch("http://localhost:3000/login");
 });
