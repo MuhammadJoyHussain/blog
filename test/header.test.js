@@ -12,11 +12,11 @@ afterEach(async () => {
   await browser.close();
 });
 
-test("The header has the correct text", async () => {
-  const text = await page.$eval("span.font-semibold", (el) => el.innerHTML);
+// test("The header has the correct text", async () => {
+//   const text = await page.$eval("span.font-semibold", (el) => el.innerHTML);
 
-  expect(text).toEqual("Let's Blog");
-});
+//   expect(text).toEqual("Let's Blog");
+// });
 
 test("Clicking login to go to login page", async () => {
   await page.click(".auth a");

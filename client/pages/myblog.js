@@ -8,7 +8,7 @@ const MyBlog = () => {
   const [blogs, setBlogs] = useState([]);
 
   useEffect(() => {
-    const config = {
+    const config = { 
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${Cookies.get("token")}`,
